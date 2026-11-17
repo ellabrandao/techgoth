@@ -8,6 +8,7 @@
 </head>
 <body>
   <main>
+    <p class="prompt"><span class="host">techgoth.club</span>:<span class="path">~</span>$ ./runner.exe<i class="cursor"></i></p>
     <div class="screen">
       <canvas id="game" aria-label="TECHGOTH.exe - jogo de corrida em ASCII"></canvas>
       <div id="namebox" style="visibility:hidden">
@@ -16,13 +17,16 @@
                autocomplete="off" autocapitalize="off" spellcheck="false">
       </div>
     </div>
-    <p class="hint">
-      <b>[ESPAÇO]</b> / <b>[↑]</b> pular &nbsp;·&nbsp;
-      <b>[↓]</b> abaixar &nbsp;·&nbsp;
-      <b>[P]</b> pausar &nbsp;·&nbsp;
-      <b>[M]</b> mudo &nbsp;·&nbsp;
-      <b>[N]</b> trocar nome &nbsp;·&nbsp;
-      toque na tela = pular, deslize pra baixo = abaixar
+    <p class="hint keys">
+      <span class="item"><kbd>ESPAÇO</kbd><kbd>↑</kbd> pular</span>
+      <span class="item"><kbd>↓</kbd> abaixar</span>
+      <span class="item"><kbd>P</kbd> pausar</span>
+      <span class="item"><kbd>M</kbd> mudo</span>
+      <span class="item"><kbd>N</kbd> trocar nome</span>
+    </p>
+    <p class="hint touch">
+      <span class="item">toque na tela = pular</span>
+      <span class="item">deslize pra baixo = abaixar</span>
     </p>
   </main>
 
