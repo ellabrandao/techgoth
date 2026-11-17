@@ -1,6 +1,37 @@
-<!doctype html>
-<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>TECHGOTH SPACE IMPACT.exe</title><link rel="stylesheet" href="style.css"></head>
-<body><main><div class="screen"><canvas id="game"></canvas></div>
-<p class="hint"><b>[WASD / SETAS]</b> mover · <b>[ESPAÇO]</b> atirar · <b>[P]</b> pausar · <b>[M]</b> mudo<br>mobile: arraste para mover e toque para atirar</p></main>
-<script src="js/game.js"></script></body></html>
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <title>TECHGOTH SPACE IMPACT.exe</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main>
+    <p class="prompt"><span class="host">techgoth.club</span>:<span class="path">~/jogo2</span>$ ./space_impact.exe<i class="cursor"></i></p>
+    <div class="screen">
+      <canvas id="game" aria-label="TECHGOTH SPACE IMPACT.exe - jogo de nave"></canvas>
+      <div id="namebox" style="visibility:hidden">
+        <label for="name">&gt; NOME:</label>
+        <input id="name" type="text" maxlength="12" placeholder="ANON"
+               autocomplete="off" autocapitalize="off" spellcheck="false">
+      </div>
+    </div>
+    <p class="hint keys">
+      <span class="item"><kbd>WASD</kbd><kbd>SETAS</kbd> mover</span>
+      <span class="item"><kbd>ESPAÇO</kbd> atirar</span>
+      <span class="item"><kbd>P</kbd> pausar</span>
+      <span class="item"><kbd>M</kbd> mudo</span>
+      <span class="item"><kbd>N</kbd> trocar nome</span>
+    </p>
+    <p class="hint touch">
+      <span class="item">arraste = mover</span>
+      <span class="item">toque = atirar</span>
+    </p>
+  </main>
+
+  <script src="config.js"></script>
+  <script src="online.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>
