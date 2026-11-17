@@ -613,42 +613,106 @@
     ctx.textAlign = 'left';
   }
 
-  function drawBoard() {
-    const x0 = 320, w = 360, y0 = 258, h = 136;
+  // moldura estilo terminal: borda fina, cantos reforçados e título "vazado" na borda
+  function drawFrame(x, y, w, h, label, strong) {
+    ctx.fillStyle = 'rgba(0,0,0,0.93)';
+    ctx.fillRect(x, y, w, h);
+    ctx.strokeStyle = strong ? '#9a9a9a' : '#5c5c5c';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(x + 0.5, y + 0.5, w - 1, h - 1);
+
+    ctx.strokeStyle = '#fff';
+    ctx.lineWidth = 2;
+    const c = 10;
+    ctx.beginPath();
+    ctx.moveTo(x, y + c);         ctx.lineTo(x, y);         ctx.lineTo(x + c, y);
+    ctx.moveTo(x + w - c, y);     ctx.lineTo(x + w, y);     ctx.lineTo(x + w, y + c);
+    ctx.moveTo(x, y + h - c);     ctx.lineTo(x, y + h);     ctx.lineTo(x + c, y + h);
+    ctx.moveTo(x + w - c, y + h); ctx.lineTo(x + w, y + h); ctx.lineTo(x + w, y + h - c);
+    ctx.stroke();
+    ctx.lineWidth = 1;
+
+    if (label) {
+      ctx.font = '12px ' + FONT;
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'middle';
+      const tw = ctx.measureText(label).width;
+      ctx.fillStyle = '#000';
+      ctx.fillRect(x + 18, y - 8, tw + 16, 16);   // abre um vão na borda pro título
+      ctx.fillStyle = '#fff';
+      ctx.fillText(label, x + 26, y);
+    }
+  }
+
+  // tabela de recordes: posição + nome ........ pontos (a sua partida fica em vídeo invertido)
+  function drawBoard(x0, y0, w, step) {
     const rows = HS_SHOW;
     const list = board();
-    ctx.fillStyle = 'rgba(0,0,0,0.88)';
-    ctx.fillRect(x0, y0, w, h);
-    ctx.strokeStyle = '#3a3a3a';
-    ctx.lineWidth = 1;
-    ctx.strokeRect(x0 + 0.5, y0 + 0.5, w - 1, h - 1);
-
+    const h = 24 + rows * step + 10;
     const tag = ONLINE.enabled ? (remote ? ' · GLOBAL' : ' · LOCAL') : '';
-    drawCentered('- TOP ' + rows + tag + ' -', y0 + 14, 13, 0.7);
+    drawFrame(x0, y0, w, h, 'TOP ' + rows + tag, false);
 
+    const pad = 18;
     ctx.textBaseline = 'middle';
-    ctx.font = '14px ' + FONT;
     for (let i = 0; i < rows; i++) {
-      const y = y0 + 36 + i * 17;
+      const y = y0 + 24 + step * i + step / 2;
       const r = list[i];
       const mine = state === 'dead' && i === lastRank;
-      const on = !mine || Math.floor(time * 5) % 2 === 0;
-      ctx.globalAlpha = r ? (on ? 1 : 0.35) : 0.3;
-      ctx.fillStyle = '#fff';
+      const inv = mine && (time - deadAt > 1.2 || Math.floor(time * 6) % 2 === 0);
+      if (inv) {
+        ctx.globalAlpha = 1;
+        ctx.fillStyle = '#fff';
+        ctx.fillRect(x0 + 6, y - step / 2 + 1, w - 12, step - 2);
+      }
+      const fg = inv ? '#000' : '#fff';
+      const label = (i + 1) + '. ' + (r ? r.name : '------');
+      const score = r ? pad6(r.hiscore) : '------';
+
+      ctx.font = (i === 0 && r ? '700 ' : '') + '14px ' + FONT;
+      ctx.globalAlpha = r ? (i === 0 || mine ? 1 : 0.8) : 0.28;
+      ctx.fillStyle = fg;
       ctx.textAlign = 'left';
-      ctx.fillText((mine ? '>' : ' ') + (i + 1) + '.', x0 + 14, y);
-      ctx.fillText(r ? r.name : '------', x0 + 62, y);
+      ctx.fillText(label, x0 + pad, y);
       ctx.textAlign = 'right';
-      ctx.fillText(r ? pad6(r.hiscore) : '------', x0 + w - 24, y);
+      ctx.fillText(score, x0 + w - pad, y);
+
+      if (r) {                                        // pontilhado entre nome e pontos
+        const a = x0 + pad + ctx.measureText(label).width + 8;
+        const b = x0 + w - pad - ctx.measureText(score).width - 8;
+        if (b > a) {
+          ctx.strokeStyle = fg;
+          ctx.globalAlpha = 0.3;
+          ctx.setLineDash([1, 4]);
+          ctx.beginPath();
+          ctx.moveTo(a, y + 6.5);
+          ctx.lineTo(b, y + 6.5);
+          ctx.stroke();
+          ctx.setLineDash([]);
+        }
+      }
     }
     ctx.globalAlpha = 1;
     ctx.textAlign = 'left';
+  }
 
-    if (state === 'dead') {
-      if (lastRank === 0) drawCentered('** NOVO RECORDE! **', y0 + h - 14, 12, 1);
-      else if (lastRank > 0 && lastRank < rows) drawCentered('ENTROU NO TOP ' + rows + '!', y0 + h - 14, 12, 1);
-      else if (lastRank >= rows) drawCentered('#' + (lastRank + 1) + '  ' + playerName + '  ' + pad6(lastPts), y0 + h - 14, 12, 0.85);
-    }
+  // tela de game over: uma "janela de erro" com a pontuação e o placar dentro
+  function drawDeadPanel() {
+    drawFrame(250, 62, 500, 332, 'fatal_error.log', true);
+    drawCentered('G A M E   O V E R', 108, 30);
+    drawCentered('SEGMENTATION FAULT (core dumped)', 136, 12, 0.5);
+    drawCentered('SC ' + pad6(lastPts), 168, 22);
+
+    let note = '';
+    if (lastRank === 0) note = '** NOVO RECORDE! **';
+    else if (lastRank > 0 && lastRank < HS_SHOW) note = 'ENTROU NO TOP ' + HS_SHOW + '!';
+    else if (lastRank >= HS_SHOW) note = '#' + (lastRank + 1) + ' no ranking';
+    if (note) drawCentered(note, 192, 12, 1);
+
+    drawBoard(290, 214, 420, 17);
+
+    const ready = time - deadAt > 0.45;
+    drawCentered('[ ↻  ESPAÇO PARA REINICIAR ]', 356, 16, ready ? (Math.floor(time * 2) % 2 ? 1 : 0.4) : 0.15);
+    drawCentered('jogando como ' + playerName + '   ·   [N] trocar nome', 380, 11, 0.5);
   }
 
   function drawOverlay() {
@@ -657,17 +721,12 @@
       drawCentered(typing ? '> DIGITE SEU NOME E TECLE [ENTER]_' : '> PRESSIONE [ESPAÇO] PARA INICIAR_',
         150, 22, Math.floor(time * 2) % 2 ? 1 : 0.35);
       drawCentered('[↑] pular    [↓] abaixar    [P] pausa    [M] mudo', 182, 14, 0.6);
-      drawBoard();
+      drawBoard(320, 258, 360, 20);
     } else if (state === 'paused') {
       drawCentered('|| PAUSADO', 200, 28);
       drawCentered('[P] continuar', 235, 14, 0.6);
     } else if (state === 'dead') {
-      drawCentered('G A M E   O V E R', 125, 32);
-      drawCentered('SEGMENTATION FAULT (core dumped)', 157, 13, 0.55);
-      const ready = time - deadAt > 0.45;
-      drawCentered('[ ↻  ESPAÇO PARA REINICIAR ]', 195, 18, ready ? (Math.floor(time * 2) % 2 ? 1 : 0.4) : 0.15);
-      drawCentered('jogando como ' + playerName + '   ·   [N] trocar nome', 225, 12, 0.55);
-      drawBoard();
+      drawDeadPanel();
     }
   }
 
