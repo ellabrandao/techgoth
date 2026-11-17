@@ -17,31 +17,62 @@ main {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 14px;
+  gap: 10px;
   padding: 12px;
 }
 
-.screen {
-  position: relative;
-  width: min(100%, 1100px);
-  aspect-ratio: 2 / 1;
-  background: #000;
-  border: 1px solid #1c1c1c;
+/* tudo alinhado na mesma largura do jogo */
+main > * { width: min(100%, 1100px); }
+
+/* linha de comando em cima do jogo */
+.prompt {
+  font-size: 12px;
+  color: #666;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-/* leve efeito de monitor CRT por cima do canvas */
+.prompt .host { color: #d0d0d0; }
+.prompt .path { color: #999; }
+
+.cursor {
+  display: inline-block;
+  width: 0.6em;
+  height: 1em;
+  margin-left: 5px;
+  background: #cfcfcf;
+  vertical-align: -0.15em;
+  animation: blink 1.06s steps(1) infinite;
+}
+
+@keyframes blink { 50% { opacity: 0; } }
+
+/* "monitor": moldura fina + brilho bem leve */
+.screen {
+  position: relative;
+  aspect-ratio: 2 / 1;
+  background: #000;
+  border: 1px solid #2c2c2c;
+  box-shadow: 0 0 0 1px #000, 0 0 70px rgba(255, 255, 255, 0.04);
+}
+
+/* efeito CRT por cima do canvas: linhas de varredura + cantos mais escuros */
 .screen::after {
   content: "";
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background: repeating-linear-gradient(
-    to bottom,
-    rgba(255, 255, 255, 0.025) 0,
-    rgba(255, 255, 255, 0.025) 1px,
-    transparent 1px,
-    transparent 3px
-  );
+  background:
+    radial-gradient(ellipse at center, transparent 62%, rgba(0, 0, 0, 0.5) 100%),
+    repeating-linear-gradient(
+      to bottom,
+      rgba(255, 255, 255, 0.025) 0,
+      rgba(255, 255, 255, 0.025) 1px,
+      transparent 1px,
+      transparent 3px
+    );
 }
 
 canvas {
@@ -51,21 +82,46 @@ canvas {
   image-rendering: pixelated;
 }
 
+/* teclas */
 .hint {
   font-size: 12px;
   color: #777;
   text-align: center;
-  line-height: 1.6;
-  max-width: 1000px;
+  line-height: 2.1;
 }
 
-.hint b { color: #ccc; font-weight: normal; }
+.hint .item {
+  display: inline-block;
+  margin: 0 10px;
+  white-space: nowrap;
+}
+
+.hint kbd {
+  font: inherit;
+  color: #e2e2e2;
+  background: #0b0b0b;
+  border: 1px solid #3d3d3d;
+  border-bottom-width: 2px;
+  border-radius: 3px;
+  padding: 0 6px;
+  margin-right: 5px;
+}
+
+.hint kbd + kbd { margin-left: -1px; }
+.hint.touch { display: none; }
+
+/* celular: mostra só as dicas de toque */
+@media (hover: none) and (pointer: coarse) {
+  .hint.keys { display: none; }
+  .hint.touch { display: block; }
+  .prompt { font-size: 11px; }
+}
 
 /* campo de nome (aparece só na tela inicial) */
 #namebox {
   position: absolute;
   left: 50%;
-  top: 41%;
+  top: 38.5%;
   transform: translateX(-50%);
   display: flex;
   align-items: center;
@@ -79,7 +135,7 @@ canvas {
 #name {
   background: #000;
   color: #fff;
-  border: 1px solid #666;
+  border: 1px solid #5c5c5c;
   padding: 4px 8px;
   width: 13ch;
   font: inherit;
@@ -89,5 +145,14 @@ canvas {
   user-select: text;
 }
 
-#name:focus { border-color: #fff; }
+#name:focus {
+  border-color: #fff;
+  box-shadow: 0 0 14px rgba(255, 255, 255, 0.18);
+}
+
 #name::placeholder { color: #555; }
+
+@media (max-width: 640px) {
+  #namebox { gap: 6px; }
+  #name { padding: 2px 6px; }
+}
