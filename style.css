@@ -60,3 +60,34 @@ canvas {
 }
 
 .hint b { color: #ccc; font-weight: normal; }
+
+/* campo de nome (aparece só na tela inicial) */
+#namebox {
+  position: absolute;
+  left: 50%;
+  top: 41%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: clamp(11px, 1.7vw, 18px);
+  z-index: 2;
+}
+
+#namebox label { opacity: 0.7; }
+
+#name {
+  background: #000;
+  color: #fff;
+  border: 1px solid #666;
+  padding: 4px 8px;
+  width: 13ch;
+  font: inherit;
+  outline: none;
+  caret-color: #fff;
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+#name:focus { border-color: #fff; }
+#name::placeholder { color: #555; }
